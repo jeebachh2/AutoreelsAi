@@ -1,0 +1,6 @@
+{
+  "name": "AutoReel AI - Automated AI Social Media SaaS",
+  "description": "Production-grade automated AI video & social media dispatch platform with multi-agent workflows, real audio mixing, and 6-platform integration.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
