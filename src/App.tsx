@@ -274,23 +274,23 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white font-sans antialiased">
+    <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white font-sans antialiased">
       
       {/* Toast Notification Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900/95 px-4 py-3 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-300">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+        <div className="fixed bottom-6 right-6 z-50 flex max-w-[calc(100vw-3rem)] items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900/95 px-4 py-3 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-300">
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
             toastMessage.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'
           }`}>
             <CheckCircle2 className="h-4 w-4" />
           </div>
-          <div>
-            <h4 className="text-xs font-bold text-white">{toastMessage.title}</h4>
-            <p className="text-[11px] text-slate-400">{toastMessage.desc}</p>
+          <div className="min-w-0 flex-1">
+            <h4 className="text-xs font-bold text-white truncate">{toastMessage.title}</h4>
+            <p className="text-[11px] text-slate-400 line-clamp-2">{toastMessage.desc}</p>
           </div>
           <button
             onClick={() => setToastMessage(null)}
-            className="ml-2 text-slate-500 hover:text-slate-300"
+            className="ml-2 text-slate-500 hover:text-slate-300 shrink-0"
           >
             <X className="h-4 w-4" />
           </button>
@@ -315,7 +315,7 @@ export default function App() {
 
       {/* VIEW 1: LANDING PAGE */}
       {viewMode === 'landing' ? (
-        <main className="space-y-0">
+        <main className="w-full max-w-[100vw] overflow-x-hidden space-y-0">
           <HeroSection
             onStartFree={() => {
               audioMixer.playSFX('ding');
@@ -365,7 +365,7 @@ export default function App() {
         </main>
       ) : (
         /* VIEW 2: DASHBOARD VIEW */
-        <div className="flex">
+        <div className="flex w-full max-w-[100vw] overflow-x-hidden">
           {/* Sidebar */}
           <Sidebar
             activeTab={activeTab}
@@ -381,7 +381,7 @@ export default function App() {
           />
 
           {/* Main Dashboard Content Area */}
-          <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 overflow-x-hidden pb-24 md:pb-8">
+          <main className="flex-1 w-full min-w-0 max-w-7xl mx-auto p-3 sm:p-6 lg:p-8 space-y-6 overflow-x-hidden pb-24 md:pb-8">
             
             {/* TAB: Home Overview & Generation Hub */}
             {activeTab === 'home' && (

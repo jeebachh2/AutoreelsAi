@@ -24,16 +24,16 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     sm: {
       img: 'h-7 w-7 rounded-lg',
       container: 'h-7 w-7',
-      text: 'text-sm font-bold',
+      text: 'text-xs sm:text-sm font-bold',
       sub: 'text-[9px]',
-      badge: 'text-[8px] px-1.5 py-0.2',
+      badge: 'text-[8px] px-1 py-0.2',
     },
     md: {
-      img: 'h-9 w-9 sm:h-10 sm:w-10 rounded-xl',
-      container: 'h-9 w-9 sm:h-10 sm:w-10',
-      text: 'text-base sm:text-lg font-bold',
-      sub: 'text-[11px]',
-      badge: 'text-[9px] sm:text-[10px] px-1.5 py-0.2 sm:px-2 sm:py-0.5',
+      img: 'h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-xl',
+      container: 'h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10',
+      text: 'text-sm sm:text-base md:text-lg font-bold',
+      sub: 'text-[10px] sm:text-[11px]',
+      badge: 'text-[8px] sm:text-[9px] px-1.5 py-0.2 sm:px-2 sm:py-0.5',
     },
     lg: {
       img: 'h-12 w-12 rounded-xl',
