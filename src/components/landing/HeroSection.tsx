@@ -95,29 +95,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
               <button
                 id="hero-start-free-cta"
                 onClick={onStartFree}
-                className="group relative inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95"
+                className="group relative inline-flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-indigo-600/30 transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95 min-h-[44px]"
               >
-                <Sparkles className="h-4 w-4 text-amber-300 group-hover:rotate-12 transition-transform" />
-                <span>Start Free — 10 Automated Posts</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <Sparkles className="h-4 w-4 text-amber-300 group-hover:rotate-12 transition-transform shrink-0" />
+                <span className="truncate">Start Free — 10 Automated Posts</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 shrink-0" />
               </button>
 
               <button
                 id="hero-live-dashboard-btn"
                 onClick={onExploreDashboard}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-5 py-3.5 text-sm font-semibold text-slate-200 transition-all hover:bg-slate-800 hover:border-slate-600"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-5 py-3.5 text-sm font-semibold text-slate-200 transition-all hover:bg-slate-800 hover:border-slate-600 min-h-[44px]"
               >
-                <Zap className="h-4 w-4 text-amber-400" />
+                <Zap className="h-4 w-4 text-amber-400 shrink-0" />
                 <span>Open Interactive Dashboard</span>
               </button>
             </div>
 
             {/* Feature Guarantees */}
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800/80 text-xs text-slate-400">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 pt-4 border-t border-slate-800/80 text-xs text-slate-400">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
                 <span>100% Fully Rendered 9:16 Video</span>

@@ -168,15 +168,15 @@ export const OnboardingNicheCard: React.FC<OnboardingNicheCardProps> = ({
         />
 
         {/* Bottom toolbar inside input card */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 mt-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2.5 border-t border-slate-800/80 mt-2">
           
           {/* Microphone Button with Speech API */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               id="mic-voice-scanner-btn"
               type="button"
               onClick={toggleMic}
-              className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all shadow-md active:scale-95 ${
+              className={`flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all shadow-md active:scale-95 min-h-[44px] ${
                 isListening
                   ? 'bg-rose-600 text-white shadow-rose-600/30 animate-pulse'
                   : 'border border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 hover:text-white hover:border-indigo-500/60'
@@ -185,12 +185,12 @@ export const OnboardingNicheCard: React.FC<OnboardingNicheCardProps> = ({
             >
               {isListening ? (
                 <>
-                  <MicOff className="h-4 w-4 text-white" />
+                  <MicOff className="h-4 w-4 text-white shrink-0" />
                   <span>Stop Dictation</span>
                 </>
               ) : (
                 <>
-                  <Mic className="h-4 w-4 text-indigo-400" />
+                  <Mic className="h-4 w-4 text-indigo-400 shrink-0" />
                   <span>Voice Scanner (Mic)</span>
                 </>
               )}
@@ -216,7 +216,7 @@ export const OnboardingNicheCard: React.FC<OnboardingNicheCardProps> = ({
             type="button"
             disabled={isGenerating || !nichePrompt.trim()}
             onClick={handleAction}
-            className={`group inline-flex items-center gap-2.5 rounded-xl px-5 py-2.5 text-xs font-bold text-white shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`group inline-flex items-center justify-center gap-2.5 rounded-xl px-5 py-2.5 text-xs font-bold text-white shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] ${
               isPaywallLocked
                 ? 'bg-gradient-to-r from-amber-500 to-rose-500 shadow-orange-500/20'
                 : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-indigo-600/25 hover:brightness-110'
@@ -224,19 +224,19 @@ export const OnboardingNicheCard: React.FC<OnboardingNicheCardProps> = ({
           >
             {isGenerating ? (
               <>
-                <RefreshCw className="h-4 w-4 animate-spin text-white" />
+                <RefreshCw className="h-4 w-4 animate-spin text-white shrink-0" />
                 <span>Agents Orchestrating...</span>
               </>
             ) : isPaywallLocked ? (
               <>
-                <Sparkles className="h-4 w-4 text-amber-300" />
+                <Sparkles className="h-4 w-4 text-amber-300 shrink-0" />
                 <span>Upgrade to Generate ($5)</span>
               </>
             ) : (
               <>
-                <Zap className="h-4 w-4 text-amber-300 group-hover:rotate-12 transition-transform" />
+                <Zap className="h-4 w-4 text-amber-300 group-hover:rotate-12 transition-transform shrink-0" />
                 <span>Run 6-Agent Reel Generator</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 shrink-0" />
               </>
             )}
           </button>

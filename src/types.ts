@@ -14,6 +14,21 @@ export interface ConnectedPlatform {
   postsPublished: number;
   scheduledQueueCount: number;
   apiEndpoint: string;
+  developerPortalUrl: string;
+  setupGuide: string[];
+  requiredFields: Array<{
+    key: 'apiKey' | 'apiSecret' | 'accessToken' | 'pageId' | 'handle';
+    label: string;
+    placeholder: string;
+    isSecret?: boolean;
+    description?: string;
+  }>;
+  isRealAccount?: boolean;
+  authMethod?: 'oauth_popup' | 'custom_api_key' | 'token';
+  customAccessToken?: string;
+  customApiKey?: string;
+  customPageId?: string;
+  lastConnectedAt?: string;
 }
 
 export interface VoiceOption {

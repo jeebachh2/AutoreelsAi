@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { AgentPipelineStep } from '../../types';
-import { Bot, Sparkles, CheckCircle2, RefreshCw, Cpu, Activity, Play, Zap, ArrowRight } from 'lucide-react';
+import { Bot, Sparkles, CheckCircle2, RefreshCw, Cpu, Activity, Play, Zap, ArrowRight, Gauge, Check, ShieldCheck, Layers, Award } from 'lucide-react';
 import { audioMixer } from '../../utils/audioSynthesizer';
 
 interface AIAgentsCenterProps {
   agents: AgentPipelineStep[];
   onTriggerAgentPipeline: () => void;
   isExecuting: boolean;
+}
+
+// Helper to format camelCase keys into human readable title
+function formatKeyLabel(key: string): string {
+  const result = key.replace(/([A-Z])/g, ' $1');
+  return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
 export const AIAgentsCenter: React.FC<AIAgentsCenterProps> = ({
@@ -110,37 +116,135 @@ export const AIAgentsCenter: React.FC<AIAgentsCenterProps> = ({
 
               {/* Metrics */}
               <div className="flex items-center justify-between text-[11px] font-mono pt-3 border-t border-slate-800/80 text-slate-400">
-                <span>Latency</span>
-                <span className="text-cyan-400">{agent.latencyMs} ms</span>
+                <span>Execution Speed</span>
+                <span className="text-cyan-400 font-semibold">{agent.latencyMs} ms</span>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Deep Inspection Panel for Selected Agent */}
+      {/* Human-Friendly Agent Activity & Configuration Panel */}
       {activeAgent && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Cpu className="h-5 w-5 text-emerald-400" />
-              <h3 className="text-base font-bold text-white">Agent Detail: {activeAgent.name}</h3>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl space-y-5">
+          
+          {/* Header Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20">
+                <Cpu className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">{activeAgent.name}</h3>
+                <p className="text-xs text-slate-400">{activeAgent.role}</p>
+              </div>
             </div>
-            <span className="rounded-full bg-slate-800 px-3 py-1 font-mono text-xs text-emerald-400">
-              {activeAgent.model}
-            </span>
+
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-xs text-emerald-300">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                Active Model: {activeAgent.model}
+              </span>
+              <span className="rounded-lg border border-slate-800 bg-slate-850 px-2.5 py-1 font-mono text-xs text-cyan-300">
+                {activeAgent.latencyMs}ms Latency
+              </span>
+            </div>
           </div>
 
-          <p className="text-xs text-slate-300 leading-relaxed">{activeAgent.description}</p>
+          {/* Description */}
+          <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-3.5 rounded-xl border border-slate-850">
+            {activeAgent.description}
+          </p>
 
-          <div className="space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Live Agent Output Payload Stream:
-            </span>
-            <pre className="rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs text-emerald-300 overflow-x-auto leading-relaxed">
-              {JSON.stringify(activeAgent.outputPayload, null, 2)}
-            </pre>
+          {/* Formatted Structured Parameters (No raw JSON) */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+                Agent Output & Synthesis Parameters
+              </span>
+              <span className="text-[11px] text-emerald-400 font-medium">
+                Verified Autonomous Execution
+              </span>
+            </div>
+
+            {activeAgent.outputPayload && typeof activeAgent.outputPayload === 'object' ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {Object.entries(activeAgent.outputPayload).map(([key, val]) => {
+                  const isConfidence = key.toLowerCase().includes('confidence') || typeof val === 'number';
+                  const isArray = Array.isArray(val);
+
+                  return (
+                    <div
+                      key={key}
+                      className="rounded-xl border border-slate-800/80 bg-slate-950/70 p-4 transition-all hover:border-slate-700"
+                    >
+                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">
+                        {formatKeyLabel(key)}
+                      </span>
+
+                      {isArray ? (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {(val as string[]).map((item, idx) => (
+                            <span
+                              key={idx}
+                              className="rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-300"
+                            >
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      ) : isConfidence && typeof val === 'number' ? (
+                        <div className="space-y-1.5 mt-1">
+                          <div className="flex items-center justify-between text-xs font-bold text-white">
+                            <span>Confidence Score</span>
+                            <span className="text-emerald-400">{Math.round(val * 100)}%</span>
+                          </div>
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
+                            <div
+                              className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full"
+                              style={{ width: `${Math.round(val * 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-sm font-semibold text-white mt-1 break-words">
+                          {String(val)}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-slate-800 bg-slate-950 p-4 text-xs text-slate-400">
+                Agent execution completed. No pending parameters.
+              </div>
+            )}
           </div>
+
+          {/* Execution Pipeline Roadmap Steps */}
+          <div className="rounded-xl border border-slate-800/80 bg-slate-950/40 p-4">
+            <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Layers className="h-3.5 w-3.5 text-indigo-400" />
+              Autonomous Step Verifications
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="flex items-center gap-2 rounded-lg bg-slate-900/80 border border-slate-800 p-2.5 text-slate-300">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>Prompt Verification & Safety Filter</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg bg-slate-900/80 border border-slate-800 p-2.5 text-slate-300">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>High-Speed Inference Output</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg bg-slate-900/80 border border-slate-800 p-2.5 text-slate-300">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>Auto-Chained to Next Stage</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       )}
 

@@ -30,11 +30,10 @@ import { AutomationSettingsCard } from './components/dashboard/AutomationSetting
 import { VideoReviewGallery } from './components/dashboard/VideoReviewGallery';
 import { SocialIntegrationCenter } from './components/dashboard/SocialIntegrationCenter';
 import { AIAgentsCenter } from './components/dashboard/AIAgentsCenter';
-import { DatabaseSchemasView } from './components/dashboard/DatabaseSchemasView';
 import { PaywallModal } from './components/dashboard/PaywallModal';
 import { audioMixer } from './utils/audioSynthesizer';
 import confetti from 'canvas-confetti';
-import { CheckCircle2, AlertCircle, Sparkles, X } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Sparkles, X, Share2, ArrowRight } from 'lucide-react';
 
 export default function App() {
   // Global View Navigation: 'landing' vs 'dashboard'
@@ -64,6 +63,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isPublishing, setIsPublishing] = useState<boolean>(false);
   const [isPaywallOpen, setIsPaywallOpen] = useState<boolean>(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<{ title: string; desc: string; type: 'success' | 'info' | 'error' } | null>(null);
 
   // Derived metrics
@@ -230,6 +230,18 @@ export default function App() {
     );
   };
 
+  // Update platform credentials and connection status
+  const handleUpdatePlatformCredentials = (platformId: PlatformId, data: Partial<ConnectedPlatform>) => {
+    setPlatforms((prev) =>
+      prev.map((p) => (p.id === platformId ? { ...p, ...data } : p))
+    );
+    showToast(
+      'Account Connected!',
+      `Your real ${platformId.toUpperCase()} account is connected and ready for auto-dispatch.`,
+      'success'
+    );
+  };
+
   // Toggle platform connection
   const handleTogglePlatform = (platformId: PlatformId) => {
     setPlatforms((prev) =>
@@ -296,6 +308,8 @@ export default function App() {
           audioMixer.playSFX('ding');
           setIsPaywallOpen(true);
         }}
+        isMobileDrawerOpen={isMobileDrawerOpen}
+        onToggleMobileDrawer={() => setIsMobileDrawerOpen((prev) => !prev)}
       />
 
       {/* VIEW 1: LANDING PAGE */}
@@ -356,10 +370,12 @@ export default function App() {
             pendingReviewsCount={pendingReviewsCount}
             connectedCount={connectedCount}
             totalPlatforms={platforms.length}
+            isMobileDrawerOpen={isMobileDrawerOpen}
+            onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
           />
 
           {/* Main Dashboard Content Area */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 overflow-x-hidden">
+          <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 overflow-x-hidden pb-24 md:pb-8">
             
             {/* TAB: Home Overview & Generation Hub */}
             {activeTab === 'home' && (
@@ -384,6 +400,58 @@ export default function App() {
                   isPaywallLocked={isPaywallLocked}
                   onOpenPaywall={() => setIsPaywallOpen(true)}
                 />
+
+                {/* Quick Social Media Accounts Status Bar */}
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-md">
+                  <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-2">
+                      <Share2 className="h-4 w-4 text-cyan-400" />
+                      <h3 className="text-sm font-bold text-white">Your Social Media Channels</h3>
+                      <span className="rounded-full bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 border border-cyan-500/20">
+                        {connectedCount} of {platforms.length} Linked
+                      </span>
+                    </div>
+                    <button
+                      id="home-manage-social-btn"
+                      onClick={() => {
+                        audioMixer.playSFX('pop');
+                        setActiveTab('platforms');
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
+                    >
+                      <span>Connect & Manage Accounts</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+                    {platforms.map((p) => (
+                      <div
+                        key={p.id}
+                        onClick={() => {
+                          audioMixer.playSFX('pop');
+                          setActiveTab('platforms');
+                        }}
+                        className={`group cursor-pointer flex flex-col p-2.5 rounded-xl border transition-all ${
+                          p.connected
+                            ? 'bg-slate-950 border-emerald-500/30 hover:border-emerald-500/60'
+                            : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className={`flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br ${p.iconColor} text-white font-bold text-[10px]`}>
+                            {p.shortName.slice(0, 2)}
+                          </div>
+                          <span className={`h-2 w-2 rounded-full ${p.connected ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-slate-600'}`} />
+                        </div>
+                        <span className="mt-2 text-xs font-bold text-white truncate">{p.shortName}</span>
+                        <span className="text-[10px] text-slate-400 truncate">
+                          {p.connected ? p.handle : '+ Connect'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Quick 2-Column Settings Grid */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -472,11 +540,9 @@ export default function App() {
                 platforms={platforms}
                 onTogglePlatform={handleTogglePlatform}
                 onRefreshTokens={handleRefreshTokens}
+                onUpdatePlatformCredentials={handleUpdatePlatformCredentials}
               />
             )}
-
-            {/* TAB: Database & Schemas */}
-            {activeTab === 'database' && <DatabaseSchemasView />}
 
             {/* TAB: Billing & Plans */}
             {activeTab === 'billing' && (
