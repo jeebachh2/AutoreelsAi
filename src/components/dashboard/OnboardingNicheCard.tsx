@@ -149,8 +149,8 @@ export const OnboardingNicheCard: React.FC<OnboardingNicheCardProps> = ({
 
         {/* Mic live indicator */}
         {isListening && (
-          <div className="flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-400 animate-pulse">
-            <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
+          <div className="flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-400">
+            <span className="h-2 w-2 rounded-full bg-rose-500" />
             <span>Listening to Voice Input...</span>
           </div>
         )}
@@ -178,7 +178,7 @@ export const OnboardingNicheCard: React.FC<OnboardingNicheCardProps> = ({
               onClick={toggleMic}
               className={`flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all shadow-md active:scale-95 min-h-[44px] ${
                 isListening
-                  ? 'bg-rose-600 text-white shadow-rose-600/30 animate-pulse'
+                  ? 'bg-rose-600 text-white shadow-rose-600/30'
                   : 'border border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 hover:text-white hover:border-indigo-500/60'
               }`}
               title="Click to speak with Web Speech API"
@@ -235,7 +235,7 @@ export const OnboardingNicheCard: React.FC<OnboardingNicheCardProps> = ({
             ) : (
               <>
                 <Zap className="h-4 w-4 text-amber-300 group-hover:rotate-12 transition-transform shrink-0" />
-                <span>Run 6-Agent Reel Generator</span>
+                <span>Generate Your Reels</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 shrink-0" />
               </>
             )}

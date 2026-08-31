@@ -50,7 +50,7 @@ export const AIAgentsCenter: React.FC<AIAgentsCenterProps> = ({
           }}
           className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold text-white shadow-lg transition-all active:scale-95 ${
             isExecuting
-              ? 'bg-emerald-600 animate-pulse'
+              ? 'bg-emerald-600'
               : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 shadow-emerald-600/20'
           }`}
         >
@@ -100,7 +100,7 @@ export const AIAgentsCenter: React.FC<AIAgentsCenterProps> = ({
                   agent.status === 'completed'
                     ? 'bg-emerald-500/20 text-emerald-300'
                     : agent.status === 'processing'
-                    ? 'bg-amber-500/20 text-amber-300 animate-pulse'
+                    ? 'bg-amber-500/20 text-amber-300'
                     : 'bg-slate-800 text-slate-400'
                 }`}>
                   <span className="h-1.5 w-1.5 rounded-full bg-current" />

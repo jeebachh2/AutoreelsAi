@@ -23,6 +23,7 @@ import { HeroSection } from './components/landing/HeroSection';
 import { PlatformGridSection } from './components/landing/PlatformGridSection';
 import { FeatureHighlightsSection } from './components/landing/FeatureHighlightsSection';
 import { PricingSection } from './components/landing/PricingSection';
+import { Footer } from './components/layout/Footer';
 import { StatsOverview } from './components/dashboard/StatsOverview';
 import { OnboardingNicheCard } from './components/dashboard/OnboardingNicheCard';
 import { AudioPreferencesCard } from './components/dashboard/AudioPreferencesCard';
@@ -345,17 +346,22 @@ export default function App() {
             }}
           />
 
-          {/* Footer */}
-          <footer className="border-t border-slate-800/80 bg-slate-950 py-12 text-center text-xs text-slate-500">
-            <div className="mx-auto max-w-7xl px-4 space-y-3">
-              <p className="font-semibold text-slate-400">
-                AutoReel AI — Multi-Agent Autonomous 9:16 Video SaaS Architecture
-              </p>
-              <p className="text-[11px]">
-                Powered by Gemini 3.7 Flash, ElevenLabs Audio, Web Audio API Ducking, and 6-Platform Social Dispatch.
-              </p>
-            </div>
-          </footer>
+          {/* Full Rich Footer */}
+          <Footer
+            onNavigateToDashboard={() => setViewMode('dashboard')}
+            onNavigateToPlatforms={() => {
+              setViewMode('dashboard');
+              setActiveTab('platforms');
+            }}
+            onNavigateToPricing={() => {
+              const pricingEl = document.getElementById('pricing');
+              if (pricingEl) {
+                pricingEl.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                setIsPaywallOpen(true);
+              }
+            }}
+          />
         </main>
       ) : (
         /* VIEW 2: DASHBOARD VIEW */
@@ -564,6 +570,15 @@ export default function App() {
                 onChangeDuration={setDuration}
               />
             )}
+
+            {/* Dashboard Bottom Footer */}
+            <div className="pt-8 border-t border-slate-800/80 mt-12">
+              <Footer
+                onNavigateToDashboard={() => setActiveTab('home')}
+                onNavigateToPlatforms={() => setActiveTab('platforms')}
+                onNavigateToPricing={() => setActiveTab('billing')}
+              />
+            </div>
 
           </main>
         </div>

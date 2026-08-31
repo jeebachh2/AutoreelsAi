@@ -105,7 +105,7 @@ export const AudioPreferencesCard: React.FC<AudioPreferencesCardProps> = ({
             onClick={handleAuditionVoice}
             className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
               isPlayingAudition
-                ? 'bg-rose-600 text-white animate-pulse'
+                ? 'bg-rose-600 text-white'
                 : 'border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700'
             }`}
           >
@@ -217,7 +217,7 @@ export const AudioPreferencesCard: React.FC<AudioPreferencesCardProps> = ({
               onClick={handleToggleMusicPreview}
               className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
                 isPlayingMusicPreview
-                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 animate-pulse'
+                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
                   : 'bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30'
               }`}
               title="Preview synthesized rhythmic beat"

@@ -11,6 +11,7 @@ class AudioSynthesizerEngine {
   private activeMusicTimers: number[] = [];
   private currentTrackType: string = 'lofi_ambient';
   private duckingAmount: number = 0.25; // 75% reduction during voiceover
+  public isSoundEffectsEnabled: boolean = false; // Disabled by default for quiet, non-distracting user navigation
 
   private getContext(): AudioContext {
     if (!this.ctx) {
@@ -59,9 +60,14 @@ class AudioSynthesizerEngine {
   }
 
   /**
-   * Play procedural sound effects
+   * Play procedural sound effects (kept silent by default to prevent UI click audio)
    */
   public playSFX(type: 'whoosh' | 'pop' | 'ding' | 'bass_drop' | 'riser' | 'camera_shutter') {
+    // Only play if sound effects are explicitly enabled
+    if (!this.isSoundEffectsEnabled) {
+      return;
+    }
+
     try {
       const ctx = this.getContext();
       const now = ctx.currentTime;
@@ -69,7 +75,6 @@ class AudioSynthesizerEngine {
       gain.connect(this.sfxGainNode || ctx.destination);
 
       if (type === 'whoosh') {
-        // White noise sweep
         const bufferSize = ctx.sampleRate * 0.3;
         const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const data = buffer.getChannelData(0);

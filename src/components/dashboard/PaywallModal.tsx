@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Crown, Sparkles, X, Check, ShieldCheck, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { audioMixer } from '../../utils/audioSynthesizer';
+import { BrandLogo } from '../layout/BrandLogo';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -94,7 +95,10 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({
         </button>
 
         {/* Header */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-3">
+          <div className="flex justify-center">
+            <BrandLogo size="md" showBadge={false} />
+          </div>
           <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-950/40 px-3 py-1 text-xs font-semibold text-amber-300">
             <Crown className="h-3.5 w-3.5 text-amber-400" />
             <span>Unlock Unlimited AutoReel Capacity</span>

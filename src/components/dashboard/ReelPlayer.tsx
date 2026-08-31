@@ -192,7 +192,7 @@ export const ReelPlayer: React.FC<ReelPlayerProps> = ({
               ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
               : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
           }`}>
-            <span className={`h-2 w-2 rounded-full ${hasApproved ? 'bg-emerald-400' : 'bg-amber-400 animate-ping'}`} />
+            <span className={`h-2 w-2 rounded-full ${hasApproved ? 'bg-emerald-400' : 'bg-amber-400'}`} />
             {hasApproved ? 'Scheduled & Dispatched' : 'Ready for Approval'}
           </span>
         </div>
@@ -230,7 +230,7 @@ export const ReelPlayer: React.FC<ReelPlayerProps> = ({
                 {/* Top Video HUD Badges */}
                 <div className="absolute top-7 left-3.5 right-3.5 flex items-center justify-between z-20">
                   <span className="flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md px-2 py-0.5 text-[9px] font-bold text-cyan-300 border border-cyan-500/30">
-                    <Radio className="h-2.5 w-2.5 animate-pulse text-cyan-400" />
+                    <Radio className="h-2.5 w-2.5 text-cyan-400" />
                     HD 9:16
                   </span>
 
@@ -261,11 +261,14 @@ export const ReelPlayer: React.FC<ReelPlayerProps> = ({
                 <div className="absolute bottom-3 left-3 right-3 z-20 space-y-2">
                   <div className="flex items-center justify-between text-xs text-white">
                     <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center font-bold text-[10px] text-white">
-                        AI
-                      </div>
+                      <img
+                        src="/autoreel_logo.jpg"
+                        alt="AutoReel Creator"
+                        referrerPolicy="no-referrer"
+                        className="h-7 w-7 rounded-full object-cover ring-1 ring-cyan-400/50 shadow-md"
+                      />
                       <div>
-                        <p className="font-bold text-[11px] text-white">@AutoReel_Creator</p>
+                        <p className="font-bold text-[11px] text-white">@AutoReel.AI</p>
                         <p className="text-[9px] text-slate-300">Voice: {reel.voice.name}</p>
                       </div>
                     </div>

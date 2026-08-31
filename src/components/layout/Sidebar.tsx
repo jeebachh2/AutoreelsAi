@@ -14,6 +14,7 @@ import {
   X,
   ChevronRight,
 } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 export type DashboardTab =
   | 'home'
@@ -111,7 +112,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
                 </span>
                 <span className="text-xs font-semibold text-slate-200">Auto-Scheduler</span>
@@ -197,12 +197,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               
               {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
-                    <Sparkles className="h-4 w-4" />
-                  </div>
-                  <span className="font-heading text-sm font-bold text-white">Dashboard Menu</span>
-                </div>
+                <BrandLogo
+                  size="sm"
+                  showBadge={false}
+                />
                 <button
                   onClick={onCloseMobileDrawer}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
@@ -215,7 +213,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3 text-xs">
                 <div className="flex items-center justify-between text-slate-300 font-semibold">
                   <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
                     Auto-Scheduler Active
                   </span>
                   <span className="font-mono text-[10px] text-indigo-400">60 FPS</span>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Pause, Sparkles, Zap, ArrowRight, Volume2, VolumeX, ShieldCheck, CheckCircle, Radio } from 'lucide-react';
 import { audioMixer } from '../../utils/audioSynthesizer';
 import { VIDEO_SOURCES } from '../../data/mockData';
+import { BrandLogo } from '../layout/BrandLogo';
 
 interface HeroSectionProps {
   onStartFree: () => void;
@@ -71,7 +72,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             {/* Live Reel Counter Pill */}
             <div className="inline-flex items-center gap-2.5 rounded-full border border-indigo-500/30 bg-indigo-950/60 px-3.5 py-1.5 backdrop-blur-md shadow-sm">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
               </span>
               <span className="font-mono text-xs font-semibold text-indigo-200">
@@ -165,7 +165,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   {/* Top Live Badges on Video */}
                   <div className="absolute top-8 left-4 right-4 flex items-center justify-between z-20">
                     <span className="flex items-center gap-1.5 rounded-full bg-slate-900/80 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
-                      <Radio className="h-3 w-3 animate-pulse text-emerald-400" />
+                      <Radio className="h-3 w-3 text-emerald-400" />
                       AUTOPILOT REEL
                     </span>
 
@@ -178,7 +178,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                       {isAudioMuted ? (
                         <VolumeX className="h-4 w-4 text-rose-400" />
                       ) : (
-                        <Volume2 className="h-4 w-4 text-emerald-400 animate-pulse" />
+                        <Volume2 className="h-4 w-4 text-emerald-400" />
                       )}
                     </button>
                   </div>
@@ -201,11 +201,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   <div className="absolute bottom-4 left-4 right-4 z-20 space-y-2.5">
                     <div className="flex items-center justify-between text-xs text-white font-medium">
                       <div className="flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-[10px]">
-                          AR
-                        </div>
+                        <img
+                          src="/autoreel_logo.jpg"
+                          alt="AutoReel Logo"
+                          referrerPolicy="no-referrer"
+                          className="h-7 w-7 rounded-full object-cover ring-1 ring-cyan-400/50 shadow-md"
+                        />
                         <div>
-                          <p className="font-bold text-xs text-white">@AI_AutoReel</p>
+                          <p className="font-bold text-xs text-white">@AutoReel.AI</p>
                           <p className="text-[10px] text-slate-300">Trending Drift Phonk 140 BPM</p>
                         </div>
                       </div>

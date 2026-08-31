@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, Zap, Shield, Crown, Play, Layers, Menu, X } from 'lucide-react';
 import { CreditState } from '../../types';
+import { BrandLogo } from './BrandLogo';
 
 export type ViewMode = 'landing' | 'dashboard';
 
@@ -53,32 +54,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          {/* Brand Logo */}
-          <div 
+          {/* Brand Logo with Official 3D Asset */}
+          <BrandLogo
+            size="md"
             onClick={() => changeView('landing')}
-            className="flex cursor-pointer items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-90"
-          >
-            <div className="relative flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-0.5 shadow-lg shadow-indigo-500/20">
-              <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-slate-950">
-                <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-400" />
-              </div>
-              <span className="absolute -bottom-1 -right-1 flex h-2.5 w-2.5 sm:h-3 sm:w-3">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex h-full w-full rounded-full bg-emerald-500"></span>
-              </span>
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="font-heading text-base sm:text-lg font-bold tracking-tight text-white">
-                  AutoReel<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400">.AI</span>
-                </span>
-                <span className="hidden xs:inline-block rounded-full border border-indigo-500/30 bg-indigo-500/10 px-1.5 py-0.2 sm:px-2 sm:py-0.5 text-[9px] sm:text-[10px] font-semibold text-indigo-300">
-                  PRO
-                </span>
-              </div>
-              <p className="hidden text-[11px] text-slate-400 md:block">Automated 9:16 Video & 6-Platform Dispatch</p>
-            </div>
-          </div>
+          />
         </div>
 
         {/* View Switcher & Actions */}

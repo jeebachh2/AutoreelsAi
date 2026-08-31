@@ -527,7 +527,7 @@ export const SocialIntegrationCenter: React.FC<SocialIntegrationCenterProps> = (
                   onClick={() => handleLaunchOAuthPopup(activeModalPlatform)}
                   className={`w-full rounded-xl py-3 px-4 text-xs font-bold text-white shadow-xl transition-all flex items-center justify-center gap-2 ${
                     isAuthenticating
-                      ? 'bg-indigo-700 animate-pulse'
+                      ? 'bg-indigo-700'
                       : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:brightness-110 shadow-indigo-600/25 active:scale-95'
                   }`}
                 >
@@ -582,7 +582,7 @@ export const SocialIntegrationCenter: React.FC<SocialIntegrationCenterProps> = (
                   onClick={() => handleValidateAndSaveManual(activeModalPlatform)}
                   className={`w-full rounded-xl py-3 px-4 text-xs font-bold text-white shadow-xl transition-all flex items-center justify-center gap-2 ${
                     isValidating
-                      ? 'bg-emerald-700 animate-pulse'
+                      ? 'bg-emerald-700'
                       : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 shadow-emerald-600/20 active:scale-95'
                   }`}
                 >
