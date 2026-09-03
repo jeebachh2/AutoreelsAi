@@ -6,7 +6,6 @@ import {
   INITIAL_REELS,
   INITIAL_AGENTS,
   INITIAL_CREDIT_STATE,
-  VIDEO_SOURCES,
 } from './data/mockData';
 import {
   CreditState,
@@ -33,6 +32,7 @@ import { SocialIntegrationCenter } from './components/dashboard/SocialIntegratio
 import { AIAgentsCenter } from './components/dashboard/AIAgentsCenter';
 import { PaywallModal } from './components/dashboard/PaywallModal';
 import { audioMixer } from './utils/audioSynthesizer';
+import { renderRealVideo } from './service/creatomateService';
 import confetti from 'canvas-confetti';
 import { CheckCircle2, AlertCircle, Sparkles, X, Share2, ArrowRight } from 'lucide-react';
 
@@ -47,6 +47,9 @@ export default function App() {
   const [voices] = useState<VoiceOption[]>(INITIAL_VOICES);
   const [tracks] = useState<MusicTrack[]>(INITIAL_TRACKS);
   const [reels, setReels] = useState<VideoReel[]>(INITIAL_REELS);
+  
+  // FIX 1: Track Currently Selected Reel for Phone Frame View
+  const [selectedReel, setSelectedReel] = useState<VideoReel | null>(INITIAL_REELS[0] || null);
   const [agents, setAgents] = useState<AgentPipelineStep[]>(INITIAL_AGENTS);
 
   // User Dashboard Configuration Form State
@@ -72,6 +75,13 @@ export default function App() {
   const pendingReviewsCount = reels.filter((r) => r.status === 'ready_for_review').length;
   const isPaywallLocked = credits.used >= credits.totalAllocated;
 
+  // Sync selected reel if reels array changes
+  useEffect(() => {
+    if (reels.length > 0 && !selectedReel) {
+      setSelectedReel(reels[0]);
+    }
+  }, [reels]);
+
   // Auto-dismiss toast
   useEffect(() => {
     if (!toastMessage) return;
@@ -95,20 +105,17 @@ export default function App() {
     audioMixer.playSFX('pop');
     showToast('6 AI Agents In Action', 'Researching viral hooks, writing script, and compositing 9:16 HD reel...', 'info');
 
-    const selectedVoice = voices.find((v) => v.id === selectedVoiceId) || voices[0];
-    const selectedTrack = tracks.find((t) => t.id === selectedTrackId) || tracks[0];
-
     try {
-      // Call server backend endpoint
-      const response = await fetch('/api/generate-reel', {
+      const response = await fetch('/api/agents/generate-reel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nichePrompt,
           voiceId: selectedVoiceId,
-          musicTrackId: selectedTrackId,
+          selectedTrackId,
           duration,
-          platforms: platforms.filter((p) => p.connected).map((p) => p.id),
+          automationMode,
+          selectedPlatforms: platforms.filter((p) => p.connected).map((p) => p.id),
         }),
       });
 
@@ -116,47 +123,45 @@ export default function App() {
 
       if (response.ok) {
         const data = await response.json();
-        newReel = data.reel;
+        newReel = data.reel || data;
+        const completedAgents = (data.agentLogs || []).reduce((updated: AgentPipelineStep[], log: any) => {
+          return updated.map((agent) => agent.id === `agent_${log.agentNumber}`
+            ? { ...agent, status: log.status, latencyMs: log.durationMs, description: log.summary }
+            : agent);
+        }, agents);
+        setAgents(completedAgents);
       } else {
-        // Fallback procedural reel synthesis if offline
-        newReel = {
-          id: `reel_${Date.now()}`,
-          title: nichePrompt.slice(0, 48) + '...',
-          niche: nichePrompt,
-          duration,
-          aspectRatio: '9:16',
-          resolution: '1080x1920 60FPS',
-          status: automationMode === 'automatic' ? 'scheduled' : 'ready_for_review',
-          videoBackgroundUrl: VIDEO_SOURCES.technology,
-          voice: selectedVoice,
-          musicTrack: selectedTrack,
-          cues: [
-            { id: 'c1', timeStart: 0, timeEnd: 4, text: 'Stop doing manual content creation in 2026.', sfxCue: 'whoosh' },
-            { id: 'c2', timeStart: 4, timeEnd: 10, text: 'This AI automated system creates 30 days of viral reels in 2 minutes.', sfxCue: 'pop' },
-            { id: 'c3', timeStart: 10, timeEnd: 18, text: 'It renders 9:16 HD vertical video and drops beats with voice ducking.', sfxCue: 'bass_drop' },
-            { id: 'c4', timeStart: 18, timeEnd: duration, text: 'Start free today and auto-post to all 6 platforms simultaneously.', sfxCue: 'ding' },
-          ],
-          targetPlatforms: ['instagram', 'tiktok', 'youtube', 'facebook', 'twitter', 'snapchat'],
-          scheduledFor: new Date(Date.now() + 3600000).toISOString(),
-          createdAt: new Date().toISOString(),
-          metrics: {
-            estimatedViews: Math.floor(Math.random() * 40000) + 15000,
-            viralScore: Math.floor(Math.random() * 10) + 90,
-            estimatedEngagementRate: 8.8,
-          },
-        };
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Agent pipeline failed (${response.status}).`);
       }
 
-      // Atomic credit deduction
+      // Finish the media compositor automatically before showing the reel as ready.
+      try {
+        const renderedVideoUrl = await renderRealVideo(newReel.cues.map((cue) => ({
+          imageUrl: `https://image.pollinations.ai/prompt/${encodeURIComponent(cue.visualFocus || newReel.niche)}?width=1080&height=1920&nologo=true`,
+          timeStart: cue.timeStart,
+          timeEnd: cue.timeEnd,
+        })), newReel.musicTrack?.id, newReel.niche);
+        newReel = { ...newReel, renderedVideoUrl: renderedVideoUrl || undefined };
+      } catch (renderError) {
+        console.error('Automatic MP4 render failed:', renderError);
+        showToast(
+          'Reel created with preview',
+          renderError instanceof Error ? renderError.message : 'MP4 render failed; preview is ready.',
+          'error'
+        );
+      }
+
+      // Deduct credit
       setCredits((prev) => ({
         ...prev,
         used: prev.used + 1,
       }));
 
-      // Add to Reels list
+      // Add to Reels list & automatically focus on newly created reel
       setReels((prev) => [newReel, ...prev]);
+      setSelectedReel(newReel);
 
-      // Success Sound & Confetti
       audioMixer.playSFX('ding');
       try {
         confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
@@ -165,16 +170,19 @@ export default function App() {
       showToast(
         '9:16 Video Reel Generated!',
         automationMode === 'automatic'
-          ? 'Reel automatically scheduled for peak 6 PM dispatch across all platforms!'
+          ? 'Reel automatically scheduled for peak dispatch!'
           : 'Ready for review in your Video Gallery.',
         'success'
       );
 
-      // Switch to gallery tab to inspect rendered 9:16 reel
       setActiveTab('gallery');
     } catch (err) {
       console.error('Generation error:', err);
-      showToast('Generation Finished', '9:16 Reel rendered and added to review gallery.', 'success');
+      showToast(
+        'Generation failed',
+        err instanceof Error ? err.message : 'The agent pipeline could not complete.',
+        'error'
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -210,7 +218,6 @@ export default function App() {
       )
     );
 
-    // Update platforms post counts
     setPlatforms((prev) =>
       prev.map((p) =>
         targetPlatforms.includes(p.id)
@@ -231,19 +238,17 @@ export default function App() {
     );
   };
 
-  // Update platform credentials and connection status
   const handleUpdatePlatformCredentials = (platformId: PlatformId, data: Partial<ConnectedPlatform>) => {
     setPlatforms((prev) =>
       prev.map((p) => (p.id === platformId ? { ...p, ...data } : p))
     );
     showToast(
       'Account Connected!',
-      `Your real ${platformId.toUpperCase()} account is connected and ready for auto-dispatch.`,
+      `Your real ${platformId.toUpperCase()} account is connected and ready.`,
       'success'
     );
   };
 
-  // Toggle platform connection
   const handleTogglePlatform = (platformId: PlatformId) => {
     setPlatforms((prev) =>
       prev.map((p) => (p.id === platformId ? { ...p, connected: !p.connected } : p))
@@ -251,15 +256,13 @@ export default function App() {
     showToast('Platform Connector Updated', 'OAuth authentication state updated successfully.', 'info');
   };
 
-  // Refresh tokens
   const handleRefreshTokens = () => {
     setPlatforms((prev) =>
       prev.map((p) => ({ ...p, tokenExpiresIn: '60 days remaining (Auto-Refreshed)' }))
     );
-    showToast('Tokens Refreshed', 'All 6 social OAuth tokens renewed with 256-bit encryption.', 'success');
+    showToast('Tokens Refreshed', 'OAuth tokens renewed with 256-bit encryption.', 'success');
   };
 
-  // Upgrade Plan Success
   const handleUpgradeSuccess = (planName: string, allocatedCredits: number) => {
     setCredits((prev) => ({
       ...prev,
@@ -330,7 +333,7 @@ export default function App() {
 
           <PlatformGridSection
             platforms={platforms}
-            onConnectPlatform={(id) => {
+            onConnectPlatform={() => {
               setViewMode('dashboard');
               setActiveTab('platforms');
             }}
@@ -346,7 +349,6 @@ export default function App() {
             }}
           />
 
-          {/* Full Rich Footer */}
           <Footer
             onNavigateToDashboard={() => setViewMode('dashboard')}
             onNavigateToPlatforms={() => {
@@ -366,7 +368,6 @@ export default function App() {
       ) : (
         /* VIEW 2: DASHBOARD VIEW */
         <div className="flex w-full max-w-[100vw] overflow-x-hidden">
-          {/* Sidebar */}
           <Sidebar
             activeTab={activeTab}
             onTabChange={(tab) => {
@@ -380,13 +381,11 @@ export default function App() {
             onCloseMobileDrawer={() => setIsMobileDrawerOpen(false)}
           />
 
-          {/* Main Dashboard Content Area */}
           <main className="flex-1 w-full min-w-0 max-w-7xl mx-auto p-3 sm:p-6 lg:p-8 space-y-6 overflow-x-hidden pb-24 md:pb-8">
             
             {/* TAB: Home Overview & Generation Hub */}
             {activeTab === 'home' && (
               <div className="space-y-6">
-                {/* Stats Overview */}
                 <StatsOverview
                   credits={credits}
                   activeSchedulesCount={reels.filter((r) => r.status === 'scheduled').length || 2}
@@ -397,7 +396,6 @@ export default function App() {
                   onOpenPaywall={() => setIsPaywallOpen(true)}
                 />
 
-                {/* Niche & Voice Scanner Card */}
                 <OnboardingNicheCard
                   nichePrompt={nichePrompt}
                   onChangeNiche={setNichePrompt}
@@ -459,7 +457,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Quick 2-Column Settings Grid */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <AudioPreferencesCard
                     voices={voices}
@@ -482,7 +479,7 @@ export default function App() {
                   />
                 </div>
 
-                {/* Featured 9:16 Video Reel Section */}
+                {/* FIX 3: Pass FULL reels array and select active item */}
                 <div className="pt-2">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-bold text-white">Latest Generated 9:16 HD Reel</h3>
@@ -493,9 +490,9 @@ export default function App() {
                       View All in Gallery →
                     </button>
                   </div>
-                  {reels[0] && (
+                  {reels.length > 0 && (
                     <VideoReviewGallery
-                      reels={[reels[0]]}
+                      reels={reels}
                       onApproveAndSchedule={handleApproveAndSchedule}
                       onQuickGenerate={handleGenerateReel}
                       isPublishing={isPublishing}
@@ -505,7 +502,7 @@ export default function App() {
               </div>
             )}
 
-            {/* TAB: Video Review Gallery (Strict 9:16 Vertical Video Only) */}
+            {/* TAB: Video Review Gallery */}
             {activeTab === 'gallery' && (
               <VideoReviewGallery
                 reels={reels}
@@ -571,7 +568,6 @@ export default function App() {
               />
             )}
 
-            {/* Dashboard Bottom Footer */}
             <div className="pt-8 border-t border-slate-800/80 mt-12">
               <Footer
                 onNavigateToDashboard={() => setActiveTab('home')}

@@ -77,6 +77,7 @@ export interface VideoReel {
   caption?: string;
   hashtags?: string[];
   videoBackgroundUrl: string;
+  renderedVideoUrl?: string;
   backupVideoTheme?: 'cyberpunk' | 'luxury' | 'technology' | 'finance' | 'fitness' | 'nature' | 'cosmic';
   voice: VoiceOption;
   musicTrack: MusicTrack;

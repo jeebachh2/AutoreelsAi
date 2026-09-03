@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+@keyframes reel-ken-burns {
+  0% {
+    transform: scale(1.05) translate3d(-1%, 0, 0);
+  }
+  50% {
+    transform: scale(1.12) translate3d(1%, -0.5%, 0);
+  }
+  100% {
+    transform: scale(1.05) translate3d(-1%, 0, 0);
+  }
+}
+
+.reel-ken-burns {
+  animation: reel-ken-burns 8s ease-in-out infinite;
+  transform-origin: center center;
+}
+
 @layer base {
   html,
   body {

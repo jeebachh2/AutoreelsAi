@@ -5,7 +5,7 @@ import express, { Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
-import { orchestrateMultiAgentReel } from './server/agents.ts';
+import { isRestrictedReelPrompt, orchestrateMultiAgentReel } from './server/agents.ts';
 import { PRISMA_SCHEMA, BULLMQ_WORKER_CODE } from './server/databaseSchemas.ts';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -224,6 +224,9 @@ async function startServer() {
       version: '2.4.0',
       timestamp: new Date().toISOString(),
       geminiConfigured: !!process.env.GEMINI_API_KEY,
+      creatomateConfigured: !!process.env.CREATOMATE_API_KEY,
+      musicSearchConfigured: !!process.env.JAMENDO_CLIENT_ID,
+      musicFallbackConfigured: !!process.env.CREATOMATE_MUSIC_URL,
     });
   });
 
@@ -240,9 +243,15 @@ async function startServer() {
         selectedPlatforms = ['instagram', 'tiktok', 'youtube', 'facebook', 'twitter', 'snapchat'],
       } = req.body;
 
+      if (isRestrictedReelPrompt(String(nichePrompt))) {
+        return res.status(400).json({
+          error: 'Content or system policy restriction violated. Please refine your request.',
+        });
+      }
+
       const result = await orchestrateMultiAgentReel({
         nichePrompt,
-        duration: duration === 60 ? 60 : 30,
+        duration: Math.max(15, Math.min(60, Number(duration) || 30)),
         voiceId,
         musicMode,
         selectedTrackId,
@@ -260,6 +269,120 @@ async function startServer() {
         success: false,
         error: error.message || 'Failed to generate reel',
       });
+    }
+  });
+
+  // Render dynamic scenes without exposing the Creatomate API key to the browser.
+  app.post('/api/render-video', async (req: Request, res: Response) => {
+    const apiKey = process.env.CREATOMATE_API_KEY;
+    const scenes = req.body?.scenes;
+    const musicTrackId = req.body?.musicTrackId;
+    const musicQuery = String(req.body?.musicQuery || 'cinematic instrumental');
+
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Creatomate API key is missing. Add CREATOMATE_API_KEY to .env.' });
+    }
+    if (!Array.isArray(scenes) || scenes.length === 0) {
+      return res.status(400).json({ error: 'At least one video scene is required.' });
+    }
+
+    try {
+      const musicSources: Record<string, string> = {
+        track_phonk_1: 'https://cdn.creatomate.com/demo/music3.mp3',
+        track_lofi_1: 'https://cdn.creatomate.com/demo/music3.mp3',
+        track_synth_1: 'https://cdn.creatomate.com/demo/music3.mp3',
+        track_trap_1: 'https://cdn.creatomate.com/demo/music3.mp3',
+      };
+      let musicSource = process.env.CREATOMATE_MUSIC_URL || '';
+      let selectedMusicName = 'Configured music';
+
+      if (!musicSource && process.env.JAMENDO_CLIENT_ID) {
+        const jamendoUrl = new URL('https://api.jamendo.com/v3.0/tracks/');
+        jamendoUrl.searchParams.set('client_id', process.env.JAMENDO_CLIENT_ID);
+        jamendoUrl.searchParams.set('format', 'json');
+        jamendoUrl.searchParams.set('limit', '1');
+        jamendoUrl.searchParams.set('audioformat', 'mp32');
+        jamendoUrl.searchParams.set('search', musicQuery.slice(0, 80));
+        jamendoUrl.searchParams.set('tags', 'instrumental');
+        const musicResponse = await fetch(jamendoUrl);
+        const musicData = await musicResponse.json().catch(() => ({}));
+        const track = musicData.results?.[0];
+        if (musicResponse.ok && track?.audiodownload) {
+          musicSource = track.audiodownload;
+          selectedMusicName = `${track.artist_name || 'Jamendo'} - ${track.name || 'Catalog track'}`;
+        }
+      }
+
+      musicSource ||= musicSources[musicTrackId] || musicSources.track_synth_1;
+      const elements = [
+        {
+          type: 'audio',
+          track: 1,
+          time: 0,
+          duration: null,
+          source: musicSource,
+          loop: true,
+          audio_fade_out: 2,
+        },
+        ...scenes.map((scene: { imageUrl?: string; timeStart?: number; timeEnd?: number }) => ({
+        type: 'composition',
+        track: 2,
+        time: Math.max(0, Number(scene.timeStart) || 0),
+        duration: Math.max(0.1, (Number(scene.timeEnd) || 0) - (Number(scene.timeStart) || 0)),
+        elements: [
+          {
+            type: 'image',
+            track: 1,
+            source: scene.imageUrl,
+            width: '100%',
+            height: '100%',
+            fit: 'cover',
+            animations: [
+              { time: 0, duration: Math.max(0.1, (Number(scene.timeEnd) || 0) - (Number(scene.timeStart) || 0)), type: 'fade' },
+            ],
+          },
+        ],
+      })),
+      ];
+
+      const renderResponse = await fetch('https://api.creatomate.com/v2/renders', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ output_format: 'mp4', width: 1080, height: 1920, elements }),
+      });
+      const renderData = await renderResponse.json().catch(() => ({}));
+
+      if (!renderResponse.ok) {
+        console.error('Creatomate API Error Response:', renderData);
+        return res.status(renderResponse.status).json({
+          error: renderData.message || renderData.error || 'Creatomate rejected the render request.',
+        });
+      }
+
+      const render = Array.isArray(renderData) ? renderData[0] : renderData;
+      if (!render?.id) {
+        return res.status(502).json({ error: 'Creatomate returned an invalid render response.' });
+      }
+
+      for (let attempt = 0; attempt < 30; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const statusResponse = await fetch(`https://api.creatomate.com/v2/renders/${render.id}`, {
+          headers: { Authorization: `Bearer ${apiKey}` },
+        });
+        const statusData = await statusResponse.json().catch(() => ({}));
+        if (statusData.status === 'succeeded' && statusData.url) return res.json({ url: statusData.url, music: selectedMusicName });
+        if (statusData.status === 'failed') {
+          return res.status(502).json({ error: statusData.error_message || 'Creatomate render failed.' });
+        }
+      }
+
+      return res.status(504).json({ error: 'Video rendering timed out. Please try again.' });
+    } catch (error) {
+      console.error('Creatomate render request failed:', error);
+      return res.status(502).json({ error: error instanceof Error ? error.message : 'Unable to contact Creatomate.' });
     }
   });
 
